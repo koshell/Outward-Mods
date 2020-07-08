@@ -54,6 +54,9 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SideLoader">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Outward\BepInEx\plugins\SideLoader.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

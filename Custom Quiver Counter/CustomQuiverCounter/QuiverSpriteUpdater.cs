@@ -11,70 +11,94 @@ using UnityEngine.UI;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using SideLoader;
+using System.IO;
 
 namespace CustomQuiverCounter
 {
     [BepInPlugin(ID, NAME, VERSION)]
+    [BepInDependency(SL.GUID, BepInDependency.DependencyFlags.HardDependency)]
     public class QuiverSpriteUpdater : BaseUnityPlugin
     {
         const string ID = "com.Zalamaur.CustomQuiverCounter";
         const string NAME = "Custom Ammo Counter";
         const string VERSION = "0.1";
         static QuiverSpriteUpdater self;
-
+        static Harmony harmony;
+        static bool debug;
 
         internal void Awake()
         {
-            var harmony = new Harmony("com.Zalamaur.CustomQuiverCounter");
-            harmony.PatchAll();
-            Logger.Log(LogLevel.Message, "Loading Complete");
-
-            //bepInExManager = this.transform.parent.gameObject;
+            harmony = new Harmony("com.Zalamaur.CustomQuiverCounter");
             self = this;
+ 
+            harmony.PatchAll();
+            Logger.Log(LogLevel.Message, "Harmony patching complete.");
         }
 
-        public void UpdateSprite(Character triggerCharacter, Item triggerItem)
+        public void UpdateSprite(Character triggerCharacter, Equipment triggerEquipment)
         {
-            this.SpriteUpdateLogic(triggerCharacter, GameObject.Find(triggerCharacter.name + " UI"), triggerItem);
+            self.Logger.Log(LogLevel.Message, "Executing function 'UpdateSprite'...");
+            this.SpriteUpdateLogic(triggerCharacter, GameObject.Find(triggerCharacter.name + " UI"), triggerEquipment);
         }
 
-
-        private void SpriteUpdateLogic(Character character, GameObject characterUIObject, Item item)
+        static GameObject CreateContainer(GameObject parentObject)
         {
-            var icon = characterUIObject.transform
-                    .Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon")
-                    .gameObject;
+            self.Logger.Log(LogLevel.Message, "Executing function 'CreateContainer'...");
 
-            /*
-            GameObject newIcon = Instantiate(icon);
-            newIcon.transform.SetParent(icon.transform);
-            newIcon.transform.SetAsLastSibling();
-            newIcon.name = "QuiverItemSprite";
-            newIcon.transform.ResetLocal();
-            
+            self.Logger.Log(LogLevel.Message, "Creating container 'GameObject'...");
+            GameObject containerObject = new GameObject();
 
-            Destroy(newIcon.transform.GetChild(0).gameObject);
-            Destroy(newIcon.GetComponent<CanvasGroup>());
-            Destroy(newIcon.GetComponent<CanvasRenderer>());
-            */
+            self.Logger.Log(LogLevel.Message, "Setting up container settings...");
+            containerObject.transform.SetParent(parentObject.transform);
+            containerObject.transform.SetAsLastSibling();
+            containerObject.name = "QuiverItemSprite";
+            containerObject.transform.ResetLocal();
+            containerObject.transform.localPosition = new Vector3(25f, 0f);
 
-            GameObject quiverSpriteUpdater = new GameObject();
-            quiverSpriteUpdater.transform.SetParent(icon.transform);
-            quiverSpriteUpdater.transform.SetAsLastSibling();
-            quiverSpriteUpdater.name = "QuiverItemSprite";
-            quiverSpriteUpdater.transform.ResetLocal();
-            Image image = quiverSpriteUpdater.AddComponent<Image>();
+            self.Logger.Log(LogLevel.Message, "Creating 'Image' component in container object...");
+            containerObject.AddComponent<Image>();
 
-            RectTransform rectTransform = quiverSpriteUpdater.GetComponent<RectTransform>();
-
-            image.sprite = item.ItemIcon;
-            quiverSpriteUpdater.transform.localPosition = new Vector3(25f, 0f);
+            self.Logger.Log(LogLevel.Message, "Setting up container 'RectTransform'...");
+            RectTransform rectTransform = containerObject.GetComponent<RectTransform>();
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 33f);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 50f);
 
-            Debug.Log(item.ItemIconPath);
-            //Canvas canvas = newIcon.AddComponent<Canvas>();
+            self.Logger.Log(LogLevel.Message, "Returning container 'GameObject'...");
+            return containerObject;
+        }
 
+        public GameObject GetContainer(GameObject parentObject)
+        {
+            self.Logger.Log(LogLevel.Message, "Executing function 'GetContainer'...");
+            Transform childObject = null;
+            self.Logger.Log(LogLevel.Message, "Attempting to find container...");
+            childObject = parentObject.transform.Find("QuiverItemSprite");
+            if (childObject != null)
+            {
+                self.Logger.Log(LogLevel.Message, "Container found, returning container...");
+                return childObject.gameObject;
+            }
+            else
+            {
+                self.Logger.Log(LogLevel.Message, "Container not found, creating container...");
+                return CreateContainer(parentObject);
+            }
+          
+        }
+
+        private void SpriteUpdateLogic(Character triggerCharacter, GameObject triggerCharacterUIObject, Equipment triggerEquipment)
+        {
+
+            self.Logger.Log(LogLevel.Message, "Executing function 'SpriteUpdateLogic'...");
+            self.Logger.Log(LogLevel.Message, "Creating 'parentObject'...");
+            GameObject parentObject = triggerCharacterUIObject.transform.Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon").gameObject;
+
+            self.Logger.Log(LogLevel.Message, "Creating 'childObject'...");
+            GameObject childObject = self.GetContainer(parentObject);
+
+            self.Logger.Log(LogLevel.Message, "Loading a sprite into 'childObject'...");
+            childObject.GetComponent<Image>().sprite = triggerEquipment.ItemIcon;
 
         }
 
@@ -85,55 +109,10 @@ namespace CustomQuiverCounter
             [HarmonyPostfix]
             public static void Postfix(Equipment _itemToEquip, Character ___m_character)
             {
-                
-                //Image imageHolder = iconObject.AddComponent<Image>() as Image;
-                Debug.Log("test");
+                self.Logger.Log(LogLevel.Message, "Postfix triggered -----------------------------");
                 self.UpdateSprite(___m_character, _itemToEquip);
-
-                //Debug.Log(iconObject.name);
-
-                //Image imageComponent = iconObject.GetComponent<Image>();
-                //imageComponent.sprite = _itemToEquip.ItemIcon;
-
-                //itemSprite = _itemToEquip.ItemIcon;
-                //GameObject y = GameObject.Find("MenuManager");
-
-
-
-
+                self.Logger.Log(LogLevel.Message, "Postfix complete  -----------------------------");
             }
         }
-
-        [HarmonyPatch(typeof(SplitScreenManager), "Awake")]
-        public class SplitScreenManager_Awake
-        {
-            // m_charUIPrefab is a field on the SplitScreenManager class.
-            // By adding three underscores before it, we can include it as an argument on our patch
-            // and Harmony will use reflection for that field on the SplitScreenManager class for us.
-            // In other words, ___m_charUIPrefab = SplitScreenManager.m_charUIPrefab
-
-            [HarmonyPostfix]
-            public static void Postfix(CharacterUI ___m_charUIPrefab)
-            {
-                Debug.Log("setting up UI");
-
-                // sometimes a short-hand variable is easier to work with
-                var ui = ___m_charUIPrefab;
-
-                // To preserve changes when scenes are loaded, we need to call:
-                GameObject.DontDestroyOnLoad(ui.gameObject);
-                // now any new gameobjects we add to this transform will be preserved on scene changes.
-
-                // Now to actually make a change, you'll likely want to get a certain part of the menu.
-                // For example, to find the Character Skill menu prefab...
-
-                var icon = ui.transform
-                    .Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon")
-                    .gameObject;
-                icon.AddComponent<Image>();
-
-            }
-        }
-
     }
 }
