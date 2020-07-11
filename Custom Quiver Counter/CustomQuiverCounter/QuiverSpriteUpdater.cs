@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-// Unity Library
-using UnityEngine;
-using UnityEngine.UI;
-
-// Mod Loader Libraries
-using BepInEx;
-using BepInEx.Logging;
+﻿using BepInEx;
 using HarmonyLib;
 using SideLoader;
-using System.IO;
+using System;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace CustomQuiverCounter
 {
@@ -20,88 +11,119 @@ namespace CustomQuiverCounter
     [BepInDependency(SL.GUID, BepInDependency.DependencyFlags.HardDependency)]
     public class QuiverSpriteUpdater : BaseUnityPlugin
     {
-        const string ID = "com.Zalamaur.CustomQuiverCounter";
-        const string NAME = "Custom Ammo Counter";
-        const string VERSION = "0.1";
-        static QuiverSpriteUpdater self;
-        static Harmony harmony;
-        static bool debug;
+        private const string ID = "com.Zalamaur.CustomQuiverCounter";
+        private const string NAME = "Custom Ammo Counter";
+        private const string VERSION = "0.1";
+        private static QuiverSpriteUpdater self;
+        private static Harmony harmony;
 
         internal void Awake()
         {
-            harmony = new Harmony("com.Zalamaur.CustomQuiverCounter");
-            self = this;
- 
-            harmony.PatchAll();
-            Logger.Log(LogLevel.Message, "Harmony patching complete.");
+            try
+            {
+                Logger.LogDebug("Creating Harmony instance...");
+                harmony = new Harmony("com.Zalamaur.CustomQuiverCounter");
+
+                self = this;
+
+                Logger.LogDebug("Harmony patching initiating...");
+                harmony.PatchAll();
+                Logger.LogDebug("Harmony patching complete.");
+            }
+            catch (Exception e)
+            {
+                QuiverSpriteUpdater.SeverityLog(e.Message, 4);
+                throw e;
+            }
+        }
+
+        private static void SeverityLog(string message, int severity = 0)
+        {
+            switch (severity)
+            {
+                case 0:
+                    self.Logger.LogInfo(message);
+                    break;
+
+                case 1:
+                    self.Logger.LogMessage(message);
+                    break;
+
+                case 2:
+                    self.Logger.LogWarning(message);
+                    break;
+
+                case 3:
+                    self.Logger.LogError(message);
+                    break;
+
+                case 4:
+                    self.Logger.LogFatal(message);
+                    break;
+
+                default:
+                    self.Logger.LogWarning("[Message has invalid severity " + severity + "] " + message);
+                    break;
+            }
         }
 
         public void UpdateSprite(Character triggerCharacter, Equipment triggerEquipment)
         {
-            self.Logger.Log(LogLevel.Message, "Executing function 'UpdateSprite'...");
             this.SpriteUpdateLogic(triggerCharacter, GameObject.Find(triggerCharacter.name + " UI"), triggerEquipment);
         }
 
-        static GameObject CreateContainer(GameObject parentObject)
+        private static GameObject CreateContainer(GameObject parentObject)
         {
-            self.Logger.Log(LogLevel.Message, "Executing function 'CreateContainer'...");
-
-            self.Logger.Log(LogLevel.Message, "Creating container 'GameObject'...");
+            self.Logger.LogDebug("Creating container 'GameObject'...");
             GameObject containerObject = new GameObject();
 
-            self.Logger.Log(LogLevel.Message, "Setting up container settings...");
+            self.Logger.LogDebug("Setting up container properties...");
             containerObject.transform.SetParent(parentObject.transform);
             containerObject.transform.SetAsLastSibling();
             containerObject.name = "QuiverItemSprite";
             containerObject.transform.ResetLocal();
             containerObject.transform.localPosition = new Vector3(25f, 0f);
 
-            self.Logger.Log(LogLevel.Message, "Creating 'Image' component in container object...");
+            self.Logger.LogDebug("Creating 'Image' component in container object...");
             containerObject.AddComponent<Image>();
 
-            self.Logger.Log(LogLevel.Message, "Setting up container 'RectTransform'...");
+            self.Logger.LogDebug("Setting up container 'RectTransform'...");
             RectTransform rectTransform = containerObject.GetComponent<RectTransform>();
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 33f);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 50f);
 
-            self.Logger.Log(LogLevel.Message, "Returning container 'GameObject'...");
+            self.Logger.LogDebug("Returning container 'GameObject'...");
             return containerObject;
         }
 
         public GameObject GetContainer(GameObject parentObject)
         {
-            self.Logger.Log(LogLevel.Message, "Executing function 'GetContainer'...");
             Transform childObject = null;
-            self.Logger.Log(LogLevel.Message, "Attempting to find container...");
+            self.Logger.LogDebug("Attempting to find container...");
             childObject = parentObject.transform.Find("QuiverItemSprite");
             if (childObject != null)
             {
-                self.Logger.Log(LogLevel.Message, "Container found, returning container...");
+                self.Logger.LogDebug("Container found, returning container...");
                 return childObject.gameObject;
             }
             else
             {
-                self.Logger.Log(LogLevel.Message, "Container not found, creating container...");
+                self.Logger.LogDebug("Container not found, creating container...");
                 return CreateContainer(parentObject);
             }
-          
         }
 
         private void SpriteUpdateLogic(Character triggerCharacter, GameObject triggerCharacterUIObject, Equipment triggerEquipment)
         {
-
-            self.Logger.Log(LogLevel.Message, "Executing function 'SpriteUpdateLogic'...");
-            self.Logger.Log(LogLevel.Message, "Creating 'parentObject'...");
+            self.Logger.LogDebug("Creating 'parentObject'...");
             GameObject parentObject = triggerCharacterUIObject.transform.Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon").gameObject;
 
-            self.Logger.Log(LogLevel.Message, "Creating 'childObject'...");
+            self.Logger.LogDebug("Creating 'childObject'...");
             GameObject childObject = self.GetContainer(parentObject);
 
-            self.Logger.Log(LogLevel.Message, "Loading a sprite into 'childObject'...");
+            self.Logger.LogDebug("Loading a sprite into 'childObject'...");
             childObject.GetComponent<Image>().sprite = triggerEquipment.ItemIcon;
-
         }
-
 
         [HarmonyPatch(typeof(CharacterEquipment), "EquipWithoutAssociating")]
         public class CharacterEquipment_EquipWithoutAssociating
@@ -109,9 +131,17 @@ namespace CustomQuiverCounter
             [HarmonyPostfix]
             public static void Postfix(Equipment _itemToEquip, Character ___m_character)
             {
-                self.Logger.Log(LogLevel.Message, "Postfix triggered -----------------------------");
-                self.UpdateSprite(___m_character, _itemToEquip);
-                self.Logger.Log(LogLevel.Message, "Postfix complete  -----------------------------");
+                try
+                {
+                    self.Logger.LogDebug("Postfix triggered -----------------------------");
+                    self.UpdateSprite(___m_character, _itemToEquip);
+                    self.Logger.LogDebug("Postfix complete  -----------------------------");
+                }
+                catch (Exception e)
+                {
+                    QuiverSpriteUpdater.SeverityLog(e.Message, 4);
+                    throw e;
+                }
             }
         }
     }
