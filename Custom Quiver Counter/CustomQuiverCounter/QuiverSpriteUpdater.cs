@@ -71,7 +71,7 @@ namespace CustomQuiverCounter
 
         public void UpdateSprite(Character triggerCharacter, Equipment triggerEquipment)
         {
-            this.SpriteUpdateLogic(triggerCharacter, GameObject.Find(triggerCharacter.name + " UI"), triggerEquipment);
+            this.SpriteUpdateLogic(GameObject.Find(triggerCharacter.name + " UI"), triggerEquipment);
         }
 
         private static GameObject CreateContainer(GameObject parentObject)
@@ -115,7 +115,7 @@ namespace CustomQuiverCounter
             }
         }
 
-        private void SpriteUpdateLogic(Character triggerCharacter, GameObject triggerCharacterUIObject, Equipment triggerEquipment)
+        private void SpriteUpdateLogic(GameObject triggerCharacterUIObject, Equipment triggerEquipment)
         {
             self.Logger.LogDebug("Creating 'parentObject'...");
             GameObject parentObject = triggerCharacterUIObject.transform.Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon").gameObject;
