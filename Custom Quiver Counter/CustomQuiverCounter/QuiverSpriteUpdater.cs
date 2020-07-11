@@ -21,6 +21,7 @@ namespace CustomQuiverCounter
         {
             try
             {
+                SeverityLog("Initialising...");
                 Logger.LogDebug("Creating Harmony instance...");
                 harmony = new Harmony("com.Zalamaur.CustomQuiverCounter");
 
@@ -29,6 +30,7 @@ namespace CustomQuiverCounter
                 Logger.LogDebug("Harmony patching initiating...");
                 harmony.PatchAll();
                 Logger.LogDebug("Harmony patching complete.");
+                SeverityLog("Initialisation complete.");
             }
             catch (Exception e)
             {
