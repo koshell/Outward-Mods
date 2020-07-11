@@ -14,18 +14,18 @@ namespace CustomQuiverCounter
         private const string ID = "com.Zalamaur.CustomQuiverCounter";
         private const string NAME = "Custom Ammo Counter";
         private const string VERSION = "0.1";
-        private static QuiverSpriteUpdater self;
+        public static QuiverSpriteUpdater self;
         private static Harmony harmony;
 
-        internal void Awake()
+        public void Awake()
         {
             try
             {
+                self = this;
+
                 SeverityLog("Initialising...");
                 Logger.LogDebug("Creating Harmony instance...");
                 harmony = new Harmony("com.Zalamaur.CustomQuiverCounter");
-
-                self = this;
 
                 Logger.LogDebug("Harmony patching initiating...");
                 harmony.PatchAll();
@@ -39,7 +39,7 @@ namespace CustomQuiverCounter
             }
         }
 
-        private static void SeverityLog(string message, int severity = 0)
+        public static void SeverityLog(string message, int severity = 0)
         {
             switch (severity)
             {
