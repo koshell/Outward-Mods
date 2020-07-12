@@ -15,7 +15,7 @@ namespace CustomQuiverCounter
         private const string NAME = "Custom Ammo Counter";
         private const string VERSION = "0.1";
         public static QuiverSpriteUpdater self;
-        private static Harmony harmony;
+        public static Harmony harmony;
 
         public void Awake()
         {
@@ -117,14 +117,19 @@ namespace CustomQuiverCounter
 
         private void SpriteUpdateLogic(GameObject triggerCharacterUIObject, Equipment triggerEquipment)
         {
-            self.Logger.LogDebug("Creating 'parentObject'...");
-            GameObject parentObject = triggerCharacterUIObject.transform.Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon").gameObject;
+            if (triggerEquipment.EquipSlot == EquipmentSlot.EquipmentSlotIDs.Quiver)
+            {
+                self.Logger.LogDebug("Creating 'parentObject'...");
+                GameObject parentObject = triggerCharacterUIObject.transform.Find("Canvas/GameplayPanels/HUD/QuiverDisplay/Icon").gameObject;
 
-            self.Logger.LogDebug("Creating 'childObject'...");
-            GameObject childObject = self.GetContainer(parentObject);
+                self.Logger.LogDebug("Creating 'childObject'...");
+                GameObject childObject = self.GetContainer(parentObject);
 
-            self.Logger.LogDebug("Loading a sprite into 'childObject'...");
-            childObject.GetComponent<Image>().sprite = triggerEquipment.ItemIcon;
+                self.Logger.LogDebug("Loading a sprite into 'childObject'...");
+                childObject.GetComponent<Image>().sprite = triggerEquipment.ItemIcon;
+            }
+
+
         }
 
         [HarmonyPatch(typeof(CharacterEquipment), "EquipWithoutAssociating")]
