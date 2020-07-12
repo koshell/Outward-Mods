@@ -80,6 +80,8 @@
   del "$(TargetDir)$(TargetName).pdb"
 ) ELSE (
   del "$(TargetDir)$(TargetName).pdb"
+  del  "..\..\..\$(ProjectName).zip"
+  "C:\Program Files\7-Zip\7z.exe" a -tzip "..\..\..\$(ProjectName).zip" "..\..\..\BepInEx"
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>

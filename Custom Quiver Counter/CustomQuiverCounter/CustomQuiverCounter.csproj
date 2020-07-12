@@ -91,6 +91,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"D:\Zaiju\Documents\Programming Projects\Outward-Mods\pdb2mdb.exe" "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>if "$(ConfigurationName)" == "Debug" (
+  "D:\Zaiju\Documents\Programming Projects\Outward-Mods\pdb2mdb.exe" "$(TargetPath)"
+  del "$(TargetDir)$(TargetName).pdb"
+) ELSE (
+  del "$(TargetDir)$(TargetName).pdb"
+  del  "..\..\..\$(ProjectName).zip"
+  "C:\Program Files\7-Zip\7z.exe" a -tzip "..\..\..\$(ProjectName).zip" "..\..\..\BepInEx"
+)</PostBuildEvent>
   </PropertyGroup>
 </Project>
