@@ -9,7 +9,7 @@ namespace QuiverEquipFix
     {
         private const string ID = "com.Zalamaur.QuiverEquipFix";
         private const string NAME = "Quiver Equip Fix";
-        private const string VERSION = "1.2";
+        private const string VERSION = "1.3";
         public static Harmony harmony;
         public static QuiverEquipFix self;
 
@@ -40,15 +40,10 @@ namespace QuiverEquipFix
             {
                 try
                 {
-                    if (!(takenItem is null) && !(takenItem is Equipment))
+                    if (takenItem is Equipment equipment)
                     {
-                        QuiverEquipFix.self.Logger.LogDebug(takenItem);
-                    }
-                    if (takenItem && takenItem is Equipment)
-                    {
-                        QuiverEquipFix.self.Logger.LogDebug(takenItem);
+                        QuiverEquipFix.self.Logger.LogDebug("The 'takenItem' is " + takenItem);
                         QuiverEquipFix.self.Logger.LogDebug("Running 'CharacterInventory_TakeItem' Postfix");
-                        Equipment equipment = (Equipment)takenItem;
                         if ((equipment.EquipSlot == EquipmentSlot.EquipmentSlotIDs.Quiver)
                             && ___m_characterEquipment.GetEquippedAmmunition()
                             && (___m_characterEquipment.GetEquippedAmmunition().ItemID
@@ -56,9 +51,6 @@ namespace QuiverEquipFix
                         {
                             ___m_characterEquipment.EquipItem(equipment, false);
                         }
-                    }else if (takenItem is null)
-                    {
-                        QuiverEquipFix.self.Logger.LogDebug("takenItem is null");
                     }
                 }
                 catch (Exception e)
@@ -78,18 +70,16 @@ namespace QuiverEquipFix
                 try
                 {
                     QuiverEquipFix.self.Logger.LogDebug("Running 'ItemDisplay_TryEquipUnequip' Postfix");
-                    if (__result && !(__instance.RefItem.IsEquipped))
+                    if (__result
+                        && !(__instance.RefItem.IsEquipped)
+                        && __instance.RefItem is Ammunition)
                     {
-                        if (!__instance.RefItem.IsEquipped)
+                        Item equippedAmmunition = __instance.LocalCharacter.Inventory.GetEquippedAmmunition();
+                        if (!(equippedAmmunition)
+                            && equippedAmmunition.ItemID
+                            != __instance.RefItem.ItemID)
                         {
-                            if (!(__instance.RefItem is Bag) && (__instance.RefItem is Ammunition))
-                            {
-                                Item equippedAmmunition = __instance.LocalCharacter.Inventory.GetEquippedAmmunition();
-                                if (!(equippedAmmunition is null) && equippedAmmunition.ItemID != __instance.RefItem.ItemID)
-                                {
-                                    __instance.LocalCharacter.Inventory.EquipItem((Equipment)__instance.RefItem, true);
-                                }
-                            }
+                            __instance.LocalCharacter.Inventory.EquipItem((Equipment)__instance.RefItem, true);
                         }
                     }
                 }
