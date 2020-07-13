@@ -7,6 +7,11 @@
     <RootNamespace>MyApplication</RootNamespace>
     <AssemblyName>MyApplication</AssemblyName>
     <Name>PowerShell Scripts</Name>
+    <PackageEntryPoint>BepInEx Log Monitor.ps1</PackageEntryPoint>
+    <DotNetVersion>net462</DotNetVersion>
+    <PackageType>Console</PackageType>
+    <PowerShellVersion>Windows PowerShell</PowerShellVersion>
+    <StartupFile>(Currently Open Script)</StartupFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
