@@ -17,16 +17,16 @@
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>full</DebugType>
 		<Optimize>false</Optimize>
-		<OutputPath>bin\Debug\</OutputPath>
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<OutputPath>C:\Program Files %28x86%29\Steam\steamapps\common\Outward\BepInEx\plugins\$safeprojectname$\</OutputPath>
+		<DefineConstants></DefineConstants>
 		<ErrorReport>prompt</ErrorReport>
 		<WarningLevel>4</WarningLevel>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>pdbonly</DebugType>
  		<Optimize>true</Optimize>
-		<OutputPath>bin\Release\</OutputPath>
-		<DefineConstants>TRACE</DefineConstants>
+		<OutputPath>..\Release\BepInEx\plugins\$safeprojectname$\</OutputPath>
+		<DefineConstants></DefineConstants>
 		<ErrorReport>prompt</ErrorReport>
 		<WarningLevel>4</WarningLevel>
 	</PropertyGroup>
@@ -49,12 +49,17 @@
 		<Compile Include="Properties\AssemblyInfo.cs" />
 	</ItemGroup>
 	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+	<Target Name="AfterBuild">
+        if "$(ConfigurationName)" == "Debug" (
+			"D:\Zaiju\Documents\Programming Projects\Outward-Mods\pdb2mdb.exe" "$(TargetPath)"
+			del "$(TargetDir)$(TargetName).pdb"
+		) ELSE (
+			del "$(TargetDir)$(TargetName).pdb"
+			del  "..\..\..\$(ProjectName).zip"
+			"C:\Program Files\7-Zip\7z.exe" a -tzip "..\..\..\$(ProjectName).zip" "..\..\..\BepInEx"
+        )
+    </Target>
+ 
 
  </Project>
