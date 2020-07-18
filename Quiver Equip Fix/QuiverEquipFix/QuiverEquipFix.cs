@@ -9,7 +9,7 @@ namespace QuiverEquipFix
     {
         private const string ID = "com.Zalamaur.QuiverEquipFix";
         private const string NAME = "Quiver Equip Fix";
-        private const string VERSION = "1.3";
+        private const string VERSION = "1.4";
         public static Harmony harmony;
         public static QuiverEquipFix self;
 
@@ -75,9 +75,9 @@ namespace QuiverEquipFix
                         && __instance.RefItem is Ammunition)
                     {
                         Item equippedAmmunition = __instance.LocalCharacter.Inventory.GetEquippedAmmunition();
-                        if (!(equippedAmmunition)
-                            && equippedAmmunition.ItemID
-                            != __instance.RefItem.ItemID)
+                        if (equippedAmmunition
+                            && (equippedAmmunition.ItemID
+                            != __instance.RefItem.ItemID))
                         {
                             __instance.LocalCharacter.Inventory.EquipItem((Equipment)__instance.RefItem, true);
                         }
